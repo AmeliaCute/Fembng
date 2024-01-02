@@ -1,6 +1,6 @@
 # Fembng
 
-Fembng is a project that allows you to generate and view images with a rainbow gradient effect (for now because i'm to lazy)
+Fembng is a project that allows you to generate and view images with a rainbow gradient effect (for now because i'm too lazy)
 
 ## Installation
 
