@@ -5,12 +5,19 @@
 #include "../common/rdwr.h"
 #include "../common/datastruct.h"
 
+
 /**
  * Generates a rainbow color gradient across the given pixel buffer.
  *
- * For each pixel, the red component is based on the y position,
- * the green on the inverse of y, and the blue on the x position.
- * Each component ranges from 0 to 255 across the buffer.
+ * @param width Width of the pixel buffer.
+ * @param height Height of the pixel buffer.
+ * @param pixels Pointer to the pixel buffer.
+ * 
+ * For each pixel, the red component is set based on the y position,
+ * the green component on the inverse of y, and the blue component
+ * on the x position. Each color component ranges from 0 to 255.
+ *
+ * This results in a smooth rainbow gradient across the entire buffer.
  */
 void generateRainbowGradient(int width, int height, RGB *pixels)
 {
@@ -54,7 +61,7 @@ void setAllPixelsToColor(int width, int height, RGB *pixels, RGB color)
  * It takes the width, height and output file name as command line arguments,
  * validates them, allocates memory for the pixels, generates a rainbow gradient
  * into the pixels array using the width and height, writes the pixel data to
- * a file named outputFileName.femboy, frees the memory, and returns EXIT_SUCCESS
+ * a file named {outputFileName}.femboy, frees the memory, and returns EXIT_SUCCESS
  * or EXIT_FAILURE based on whether the operations succeeded.
  */
 int main(int argc, char *argv[])

@@ -79,6 +79,15 @@ void runLengthEncode(RGB *pixels, int size, RLE **encodedData, int *encodedSize)
     *encodedSize = index;
 }
 
+/**
+ * Writes RGB pixel data to a binary file in run-length encoded format.
+ *
+ * @param filename Path to output binary file
+ * @param width Width of image
+ * @param height Height of image
+ * @param pixels RGB pixel data to encode and write
+ * @return 0 on success, non-zero on failure
+ */
 int writeBinaryFile(const char *filename, int width, int height, RGB *pixels)
 {
     FILE *file = fopen(filename, "wb");
