@@ -4,6 +4,7 @@
 
 #include "../common/rdwr.h"
 #include "../common/datastruct.h"
+#include "../common/convert.h"
 
 
 /**
@@ -54,26 +55,19 @@ void setAllPixelsToColor(int width, int height, RGB *pixels, RGB color)
     }
 }
 
-/**
- * The main function parses command line arguments, allocates memory for pixels,
- * generates a rainbow gradient, writes the pixel data to a file, and cleans up.
- *
- * It takes the width, height and output file name as command line arguments,
- * validates them, allocates memory for the pixels, generates a rainbow gradient
- * into the pixels array using the width and height, writes the pixel data to
- * a file named {outputFileName}.femboy, frees the memory, and returns EXIT_SUCCESS
- * or EXIT_FAILURE based on whether the operations succeeded.
- */
+
 int main(int argc, char *argv[])
 {
-    if (argc != 7)
+    if (argc < 5)
     {
-        fprintf(stderr, "Usage: %s -w <width> -h <height> -o <output_file>\n", argv[0]);
+        fprintf(stderr, "Usage: %s -w <width> -h <height> -o <output_file> [-q number_colors] [-c <input_file>]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    int width, height;
-    char *outputFileName;
+    int width = 8, height = 8;
+    unsigned char *quantization;
+    char *outputFileName = "test";
+    char *inputFileName = NULL;
 
     for (int i = 1; i < argc; i += 2)
     {
@@ -89,6 +83,14 @@ int main(int argc, char *argv[])
         {
             outputFileName = argv[i + 1];
         }
+        else if (strcmp(argv[i], "-c") == 0)
+        {
+            inputFileName = argv[i + 1];
+        }
+        else if (strcmp(argv[i], "-q") == 0)
+        {
+            quantization = argv[i + 1];
+        }  // TODO: Implement quantization option
         else
         {
             fprintf(stderr, "Unknown option: %s\n", argv[i]);
@@ -96,27 +98,36 @@ int main(int argc, char *argv[])
         }
     }
 
-    RGB *pixels = (RGB *)malloc(width * height * sizeof(RGB));
-    if (!pixels)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        return EXIT_FAILURE;
-    }
+    if (inputFileName) {
+        if (convertJPEGToFemboy(inputFileName, outputFileName) != 0)
+        {
+            fprintf(stderr, "Failed to convert JPEG to femboy\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        // Generate rainbow gradient
+        RGB *pixels = (RGB *)malloc(width * height * sizeof(RGB));
+        if (!pixels)
+        {
+            fprintf(stderr, "Memory allocation failed\n");
+            return EXIT_FAILURE;
+        }
 
-    generateRainbowGradient(width, height, pixels);
+        generateRainbowGradient(width, height, pixels);
 
-    char outputFileNameWithExt[256];
-    strcpy(outputFileNameWithExt, outputFileName);
-    strcat(outputFileNameWithExt, ".femboy");
+        char outputFileNameWithExt[256];
+        strcpy(outputFileNameWithExt, outputFileName);
+        strcat(outputFileNameWithExt, ".femboy");
 
-    if (writeBinaryFile(outputFileNameWithExt, width, height, pixels) != 0)
-    {
-        fprintf(stderr, "Failed to write output file\n");
+        if (writeBinaryFile(outputFileNameWithExt, width, height, pixels) != 0)
+        {
+            fprintf(stderr, "Failed to write output file\n");
+            free(pixels);
+            return EXIT_FAILURE;
+        }
+
         free(pixels);
-        return EXIT_FAILURE;
     }
-
-    free(pixels);
 
     return EXIT_SUCCESS;
 }

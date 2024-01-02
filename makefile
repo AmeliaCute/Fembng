@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -std=c11
+LDFLAGS = -ljpeg -lSDL2 -lm
 
 SRC_DIR=source
 BUILD_DIR=build
@@ -34,14 +35,14 @@ $(COMMON_DIR)/%.o: $(SRC_DIR)/common/%.c
 
 # Compile fembng
 $(TARGET_FEMBNG): $(OBJS_COMMON) $(OBJS_FEMBNG)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 
 
 $(FEMBNG_DIR)/%.o: $(SRC_DIR)/fembng/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Compile fembngapp
 $(TARGET_FEMBNGAPP): $(OBJS_COMMON) $(OBJS_FEMBNGAPP)
-	$(CC) $(CFLAGS) -o $@ $^ -lSDL2
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) 
 
 $(FEMBNGAPP_DIR)/%.o: $(SRC_DIR)/fembngapp/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -52,5 +53,10 @@ clean:
 test: all
 	./$(TARGET_FEMBNG) -w 5000 -h 5000 -o test1
 	./$(TARGET_FEMBNGAPP) ./test1.femboy
+
+check: all
+	valgrind ./$(TARGET_FEMBNG) -w 5000 -h 5000 -o test1
+	valgrind ./$(TARGET_FEMBNG) -c ./test.jpg -o testjpg
+	./$(TARGET_FEMBNGAPP) ./test1.femboy & ./$(TARGET_FEMBNGAPP) ./testjpg.femboy
 
 .PHONY: all clean

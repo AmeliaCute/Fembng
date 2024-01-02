@@ -1,40 +1,6 @@
 #include "rdwr.h"
 
 /**
- * Performs chroma subsampling on the given RGB pixel data by averaging 2x2 blocks.
- * Reduces the horizontal and vertical resolution by half.
- */
-void chromaSubsampling(int width, int height, RGB *pixels)
-{
-    printf("Chroma subsampling...\n");
-    for (int i = 0; i < height; i += 2)
-    {
-        for (int j = 0; j < width; j += 2)
-        {
-            RGB avgColor;
-            avgColor.r = (pixels[i * width + j].r + pixels[i * width + j + 1].r +
-                          pixels[(i + 1) * width + j].r + pixels[(i + 1) * width + j + 1].r) /
-                         4;
-
-            avgColor.g = (pixels[i * width + j].g + pixels[i * width + j + 1].g +
-                          pixels[(i + 1) * width + j].g + pixels[(i + 1) * width + j + 1].g) /
-                         4;
-
-            avgColor.b = (pixels[i * width + j].b + pixels[i * width + j + 1].b +
-                          pixels[(i + 1) * width + j].b + pixels[(i + 1) * width + j + 1].b) /
-                         4;
-
-            pixels[i * width + j] = avgColor;
-            pixels[i * width + j + 1] = avgColor;
-            pixels[(i + 1) * width + j] = avgColor;
-            pixels[(i + 1) * width + j + 1] = avgColor;
-        }
-    }
-    printf("Done\n");
-}
-
-
-/**
  * Encodes RGB pixel data into run-length encoded format.
  *
  * @param pixels Pointer to RGB pixel data to encode
@@ -104,6 +70,7 @@ int writeBinaryFile(const char *filename, int width, int height, RGB *pixels)
     int encodedSize;
 
     chromaSubsampling(width, height, pixels);
+    applyQuantization(width, height, pixels, 64);
     runLengthEncode(pixels, width * height, &encodedData, &encodedSize);
 
     fwrite(&encodedSize, sizeof(int), 1, file);
@@ -176,5 +143,51 @@ int readBinaryFile(const char *filename, int *width, int *height, RGB **pixels)
 
     free(encodedData);
     fclose(file);
+    return 0;
+}
+
+int readJPEGFile(const char *filename, int *width, int *height, RGB **pixels)
+{
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+
+    FILE *infile;
+    JSAMPARRAY buffer;
+    int row_stride;
+
+    if ((infile = fopen(filename, "rb")) == NULL) {
+        fprintf(stderr, "Can't open %s\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+
+    jpeg_stdio_src(&cinfo, infile);
+    (void)jpeg_read_header(&cinfo, TRUE);
+    (void)jpeg_start_decompress(&cinfo);
+
+    *width = cinfo.output_width;
+    *height = cinfo.output_height;
+
+    row_stride = cinfo.output_width * cinfo.output_components;
+    buffer = (*cinfo.mem->alloc_sarray)
+        ((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
+
+    *pixels = (RGB *)malloc((*width) * (*height) * sizeof(RGB));
+
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void)jpeg_read_scanlines(&cinfo, buffer, 1);
+        for (int i = 0; i < cinfo.output_width; ++i) {
+            (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].r = buffer[0][i * cinfo.output_components];
+            (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].g = buffer[0][i * cinfo.output_components + 1];
+            (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].b = buffer[0][i * cinfo.output_components + 2];
+        }
+    }
+
+    (void)jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+
+    fclose(infile);
     return 0;
 }

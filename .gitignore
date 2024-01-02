@@ -4,3 +4,6 @@ build/
 .vs/
 .idea/
 *.femboy
+*.jpg
+*.png
+*.ico
