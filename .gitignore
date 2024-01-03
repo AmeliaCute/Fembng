@@ -7,3 +7,5 @@ build/
 *.jpg
 *.png
 *.ico
+
+!.github/assets/1.png
