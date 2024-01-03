@@ -60,12 +60,11 @@ int main(int argc, char *argv[])
 {
     if (argc < 5)
     {
-        fprintf(stderr, "Usage: %s -w <width> -h <height> -o <output_file> [-q number_colors] [-c <input_file>]\n", argv[0]);
+        fprintf(stderr, "Usage: %s -w <width> -h <height> -o <output_file> [-c <input_file>]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     int width = 8, height = 8;
-    unsigned char *quantization;
     char *outputFileName = "test";
     char *inputFileName = NULL;
 
@@ -87,10 +86,6 @@ int main(int argc, char *argv[])
         {
             inputFileName = argv[i + 1];
         }
-        else if (strcmp(argv[i], "-q") == 0)
-        {
-            quantization = argv[i + 1];
-        }  // TODO: Implement quantization option
         else
         {
             fprintf(stderr, "Unknown option: %s\n", argv[i]);

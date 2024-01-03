@@ -1,11 +1,18 @@
 #include "convert.h"
 
-int convertJPEGToFemboy(const char *inputFile, const char *outputFile )
+/**
+ * Converts a JPEG image to a Fembng binary image file.
+ *
+ * Reads the JPEG image from the input file, converts it to the Fembng
+ * binary format, and writes the output to a file with .femboy extension.
+ *
+ * Returns EXIT_SUCCESS on success, EXIT_FAILURE otherwise.
+ */
+int convertJPEGToFemboy(const char *inputFile, const char *outputFile)
 {
     RGB *jpegPixels;
     int jpegWidth, jpegHeight;
 
-    // Read JPEG file
     if (readJPEGFile(inputFile, &jpegWidth, &jpegHeight, &jpegPixels) != 0)
     {
         fprintf(stderr, "Failed to read JPEG file\n");

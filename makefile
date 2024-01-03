@@ -54,9 +54,7 @@ test: all
 	./$(TARGET_FEMBNG) -w 5000 -h 5000 -o test1
 	./$(TARGET_FEMBNGAPP) ./test1.femboy
 
-check: all
+check: clean all
 	valgrind ./$(TARGET_FEMBNG) -w 5000 -h 5000 -o test1
 	valgrind ./$(TARGET_FEMBNG) -c ./test.jpg -o testjpg
 	./$(TARGET_FEMBNGAPP) ./test1.femboy & ./$(TARGET_FEMBNGAPP) ./testjpg.femboy
-
-.PHONY: all clean

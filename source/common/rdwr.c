@@ -146,6 +146,15 @@ int readBinaryFile(const char *filename, int *width, int *height, RGB **pixels)
     return 0;
 }
 
+/**
+ * Reads a JPEG image file into RGB pixel data.
+ *
+ * @param filename Path to JPEG file
+ * @param width Pointer to int to store image width
+ * @param height Pointer to int to store image height
+ * @param pixels Pointer to RGB pixel array to fill with image data
+ * @return 0 on success, non-zero on failure
+ */
 int readJPEGFile(const char *filename, int *width, int *height, RGB **pixels)
 {
     struct jpeg_decompress_struct cinfo;
@@ -155,7 +164,8 @@ int readJPEGFile(const char *filename, int *width, int *height, RGB **pixels)
     JSAMPARRAY buffer;
     int row_stride;
 
-    if ((infile = fopen(filename, "rb")) == NULL) {
+    if ((infile = fopen(filename, "rb")) == NULL)
+    {
         fprintf(stderr, "Can't open %s\n", filename);
         exit(EXIT_FAILURE);
     }
@@ -171,14 +181,15 @@ int readJPEGFile(const char *filename, int *width, int *height, RGB **pixels)
     *height = cinfo.output_height;
 
     row_stride = cinfo.output_width * cinfo.output_components;
-    buffer = (*cinfo.mem->alloc_sarray)
-        ((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
+    buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
 
     *pixels = (RGB *)malloc((*width) * (*height) * sizeof(RGB));
 
-    while (cinfo.output_scanline < cinfo.output_height) {
+    while (cinfo.output_scanline < cinfo.output_height)
+    {
         (void)jpeg_read_scanlines(&cinfo, buffer, 1);
-        for (int i = 0; i < cinfo.output_width; ++i) {
+        for (int i = 0; i < cinfo.output_width; ++i)
+        {
             (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].r = buffer[0][i * cinfo.output_components];
             (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].g = buffer[0][i * cinfo.output_components + 1];
             (*pixels)[(cinfo.output_scanline - 1) * (*width) + i].b = buffer[0][i * cinfo.output_components + 2];
